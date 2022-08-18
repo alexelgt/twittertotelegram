@@ -20,7 +20,7 @@ import json
 
 import requests
 
-from regex import TWITTER_USERNAME_REGEX
+from twittertotelegram.regex import TWITTER_USERNAME_REGEX
 
 from twittertotelegram.config import BOT_TOKEN
 
