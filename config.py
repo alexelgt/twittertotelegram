@@ -23,16 +23,20 @@ news_info = [
         "channel_id": -1001790033099
     },
     {
+        "screen_name": "NianticHelp",
+        "channel_id": -1001609741706
+    },
+    {
+        "screen_name": "poke_miners",
+        "channel_id": -1001516322334
+    },
+    {
         "screen_name": "LeekDuck",
         "channel_id": -1001632232660
     },
     {
         "screen_name": "LEGENDSLima",
         "channel_id": -1001740184540
-    },
-    {
-        "screen_name": "poke_miners",
-        "channel_id": -1001516322334
     },
     {
         "screen_name": "PikminBloom",
