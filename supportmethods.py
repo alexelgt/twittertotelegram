@@ -53,7 +53,7 @@ def send_text_message(chat_id, output_text, link_entities=None):
     try:
         if output_text != None:
             message_sent = requests.post(
-                url="https://api.telegram.org/bot{}/sendMessage".format(BOT_TOKEN),
+                url=f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
                 data={
                     "chat_id": chat_id,
                     "text": output_text,
@@ -75,7 +75,7 @@ def send_media_group_message(chat_id, output_text, media_info, link_entities=Non
             images_info[0]["caption_entities"] = link_entities
 
             message_sent = requests.post(
-                url="https://api.telegram.org/bot{}/sendMediaGroup".format(BOT_TOKEN),
+                url=f"https://api.telegram.org/bot{BOT_TOKEN}/sendMediaGroup",
                 data={
                     "chat_id": chat_id,
                     "media": json.dumps(images_info)
@@ -97,7 +97,7 @@ def update_username_entities(link_entities, output_text):
         output_text_before_len = utf_16_len(output_text_before)
         username_text_len = utf_16_len(username_text)
 
-        username_url = "https://twitter.com/{}".format(username_text[1:])
+        username_url = f"https://twitter.com/{username_text[1:]}"
 
         link_entities.extend([
             {"type": "text_link", "offset": output_text_before_len, "length": username_text_len, "url": username_url}
@@ -107,7 +107,7 @@ def update_link_entities(link_entities, link_text, output_text, screen_name, twe
     output_text_len = utf_16_len(output_text)
     link_text_len = utf_16_len(link_text)
 
-    tweet_url = "https://twitter.com/{}/status/{}".format(screen_name, tweet_id)
+    tweet_url = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
     link_entities.extend([
         {"type": "text_link", "offset": output_text_len - link_text_len, "length": link_text_len, "url": tweet_url},

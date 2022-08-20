@@ -50,7 +50,7 @@ def main():
                             if support.send_tweet(news_element["screen_name"], tweet.full_text):
                                 # Original Tweet
                                 link_text = "🔗 Tweet link"
-                                output_text = tweet.full_text.replace("&amp;", "&") + "\n\n{}".format(link_text)
+                                output_text = tweet.full_text.replace("&amp;", "&") + f"\n\n{link_text}"
 
                                 link_entities = []
 
@@ -61,7 +61,7 @@ def main():
                                 # Reply Tweet
                                 if tweet.in_reply_to_screen_name == news_element["screen_name"]:
                                     link_text = "📩 In reply to"
-                                    output_text += " | {}".format(link_text)
+                                    output_text += f" | {link_text}"
 
                                     support.update_link_entities(link_entities, link_text, output_text, news_element["screen_name"], tweet.in_reply_to_status_id)
 
