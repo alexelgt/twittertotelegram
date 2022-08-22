@@ -49,8 +49,15 @@ def main():
                         if tweet.in_reply_to_screen_name in [news_element["screen_name"], None]:
                             if support.send_tweet(news_element["screen_name"], tweet.full_text):
                                 # Original Tweet
+
+                                # Remove media link from output text
+                                try:
+                                    output_text = tweet.full_text.replace(tweet.extended_entities["media"][0]["url"], "")
+                                except AttributeError:
+                                    output_text = tweet.full_text
+
                                 link_text = "🔗 Tweet link"
-                                output_text = tweet.full_text.replace("&amp;", "&") + f"\n\n{link_text}"
+                                output_text = output_text.replace("&amp;", "&") + f"\n\n{link_text}"
 
                                 link_entities = []
 

@@ -36,7 +36,7 @@ def send_tweet(screen_name, tweet_text):
 
     return True
 
-def get_tweets(app, account, since_id=None, number_tweets=200):
+def get_tweets(app, account, since_id=None, number_tweets=80):
     tweets = tweepy.Cursor(app.user_timeline, 
         screen_name=account, 
         tweet_mode="extended",
