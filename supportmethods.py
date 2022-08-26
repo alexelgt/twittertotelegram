@@ -114,6 +114,13 @@ def update_link_entities(link_entities, link_text, output_text, screen_name, twe
         {"type": "bold", "offset": output_text_len - link_text_len, "length": link_text_len}
     ])
 
+def get_video_url(video_variants):
+    for video_variant in video_variants:
+        if video_variant["content_type"] != "application/x-mpegURL":
+            return video_variant["url"]
+
+    return None
+
 def get_media_info(tweet_media_entities):
     media_info = []
 
@@ -127,12 +134,15 @@ def get_media_info(tweet_media_entities):
                     }
                 )
             elif media["type"] == "video":
-                media_info.append(
-                    {
-                        "type": "video",
-                        "media_url": media["video_info"]["variants"][0]["url"]
-                    }
-                )
+                video_url = get_video_url(media["video_info"]["variants"])
+
+                if video_url:
+                    media_info.append(
+                        {
+                            "type": "video",
+                            "media_url": video_url
+                        }
+                    )
         except:
             pass
 
