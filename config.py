@@ -17,32 +17,26 @@
 import os
 import configparser
 
-news_info = [
-    {
-        "screen_name": "PokemonGoApp",
+news_info = {
+    "PokemonGoApp" :{
         "channel_id": -1001790033099
     },
-    {
-        "screen_name": "NianticHelp",
+    "NianticHelp": {
         "channel_id": -1001609741706
     },
-    {
-        "screen_name": "poke_miners",
+    "poke_miners": {
         "channel_id": -1001516322334
     },
-    {
-        "screen_name": "LeekDuck",
+    "LeekDuck": {
         "channel_id": -1001632232660
     },
-    {
-        "screen_name": "LEGENDSLima",
+    "LEGENDSLima": {
         "channel_id": -1001740184540
     },
-    {
-        "screen_name": "PikminBloom",
+    "PikminBloom": {
         "channel_id": -1001637695143
-    },
-]
+    }
+}
 
 SCRIPT_FOLDER = os.path.dirname(__file__) + "/"
 

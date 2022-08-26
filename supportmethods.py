@@ -16,13 +16,15 @@
 
 import tweepy
 
+from time import sleep
+
 import json
 
 import requests
 
 from twittertotelegram.regex import TWITTER_USERNAME_REGEX
 
-from twittertotelegram.config import BOT_TOKEN
+from twittertotelegram.config import BOT_TOKEN, news_info
 
 def utf_16_len(text):
     return int(len(text.encode("utf-16-le")) / 2)
@@ -147,3 +149,51 @@ def get_media_info(tweet_media_entities):
             pass
 
     return media_info
+
+def process_tweet(tweet):
+    try:
+        try:
+            # Expected Exception if it's not a RT (RTs should not be sent)
+            tweet.retweeted_status
+        except AttributeError:
+            screen_name = tweet.user.screen_name
+
+            # If it's not a RT
+            if tweet.in_reply_to_screen_name in [screen_name, None]:
+                if send_tweet(screen_name, tweet.full_text):
+                    # Original Tweet
+
+                    # Remove media link from output text
+                    try:
+                        output_text = tweet.full_text.replace(tweet.extended_entities["media"][0]["url"], "")
+                    except AttributeError:
+                        output_text = tweet.full_text
+
+                    link_text = "🔗 Tweet link"
+                    output_text = output_text.replace("&amp;", "&") + f"\n\n{link_text}"
+
+                    link_entities = []
+
+                    update_username_entities(link_entities, output_text)
+
+                    update_link_entities(link_entities, link_text, output_text, screen_name, tweet.id)
+
+                    # Reply Tweet
+                    if tweet.in_reply_to_screen_name == screen_name:
+                        link_text = "📩 In reply to"
+                        output_text += f" | {link_text}"
+
+                        update_link_entities(link_entities, link_text, output_text, screen_name, tweet.in_reply_to_status_id)
+
+                    try:
+                        # Expected Exception if Tweet does not have media
+                        media_info = get_media_info(tweet.extended_entities["media"])
+
+                        send_media_group_message(news_info[screen_name]["channel_id"], output_text, media_info, link_entities=link_entities)
+                    except AttributeError:
+                        # If it's not media
+                        send_text_message(news_info[screen_name]["channel_id"], output_text, link_entities=link_entities)
+
+                    sleep(1)
+    except:
+        pass

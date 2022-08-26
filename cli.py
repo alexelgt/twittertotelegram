@@ -16,8 +16,6 @@
 
 import tweepy
 
-from time import sleep
-
 import twittertotelegram.sql as sql
 
 import twittertotelegram.supportmethods as support
@@ -30,63 +28,20 @@ def main():
 
     app = tweepy.API(auth, wait_on_rate_limit=True)
 
-    for news_element in news_info:
-        since_id_old = sql.get_since_id(news_element["screen_name"])
+    for screen_name in news_info:
+        since_id_old = sql.get_since_id(screen_name)
 
-        tweets = support.get_tweets(app, news_element["screen_name"], since_id=since_id_old)
+        tweets = support.get_tweets(app, screen_name, since_id=since_id_old)
 
         try:
             # Expected Exception if len(tweets) == 0
             since_id_new = tweets[0].id
 
             for tweet in tweets[::-1]:
-                try:
-                    try:
-                        # Expected Exception if it's not a RT (RTs should not be sent)
-                        tweet.retweeted_status
-                    except AttributeError:
-                        # If it's not a RT
-                        if tweet.in_reply_to_screen_name in [news_element["screen_name"], None]:
-                            if support.send_tweet(news_element["screen_name"], tweet.full_text):
-                                # Original Tweet
-
-                                # Remove media link from output text
-                                try:
-                                    output_text = tweet.full_text.replace(tweet.extended_entities["media"][0]["url"], "")
-                                except AttributeError:
-                                    output_text = tweet.full_text
-
-                                link_text = "🔗 Tweet link"
-                                output_text = output_text.replace("&amp;", "&") + f"\n\n{link_text}"
-
-                                link_entities = []
-
-                                support.update_username_entities(link_entities, output_text)
-
-                                support.update_link_entities(link_entities, link_text, output_text, news_element["screen_name"], tweet.id)
-
-                                # Reply Tweet
-                                if tweet.in_reply_to_screen_name == news_element["screen_name"]:
-                                    link_text = "📩 In reply to"
-                                    output_text += f" | {link_text}"
-
-                                    support.update_link_entities(link_entities, link_text, output_text, news_element["screen_name"], tweet.in_reply_to_status_id)
-
-                                try:
-                                    # Expected Exception if Tweet does not have media
-                                    media_info = support.get_media_info(tweet.extended_entities["media"])
-
-                                    support.send_media_group_message(news_element["channel_id"], output_text, media_info, link_entities=link_entities)
-                                except AttributeError:
-                                    # If it's not media
-                                    support.send_text_message(news_element["channel_id"], output_text, link_entities=link_entities)
-
-                                sleep(1)
-                except:
-                    pass
+                support.process_tweet(tweet)
 
             if since_id_new != since_id_old:
-                sql.update_since_id(news_element["screen_name"], since_id_new)
+                sql.update_since_id(screen_name, since_id_new)
         except IndexError:
             pass
 
