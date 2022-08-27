@@ -18,23 +18,29 @@ import os
 import configparser
 
 news_info = {
-    "PokemonGoApp" :{
-        "channel_id": -1001790033099
+    "2839430431" :{
+        "channel_id": -1001790033099,
+        "screen_name": "PokemonGoApp"
     },
-    "NianticHelp": {
-        "channel_id": -1001609741706
+    "849344094681870336": {
+        "channel_id": -1001609741706,
+        "screen_name": "NianticHelp"
     },
-    "poke_miners": {
-        "channel_id": -1001516322334
+    "1163205412650475520": {
+        "channel_id": -1001516322334,
+        "screen_name": "poke_miners"
     },
-    "LeekDuck": {
-        "channel_id": -1001632232660
+    "840992778020630531": {
+        "channel_id": -1001632232660,
+        "screen_name": "LeekDuck"
     },
-    "LEGENDSLima": {
-        "channel_id": -1001740184540
+    "1024025263586172928": {
+        "channel_id": -1001740184540,
+        "screen_name": "LEGENDSLima"
     },
-    "PikminBloom": {
-        "channel_id": -1001637695143
+    "1450170589071626243": {
+        "channel_id": -1001637695143,
+        "screen_name": "PikminBloom"
     }
 }
 
@@ -54,3 +60,5 @@ APP_SECRET = config_info["twitter"]["app_secret"]
 
 OAUTH_TOKEN = config_info["twitter"]["oauth_token"]
 OAUTH_TOKEN_SECRET = config_info["twitter"]["oauth_token_secret"]
+
+BEARER_TOKEN = config_info["twitter"]["bearer_token"]

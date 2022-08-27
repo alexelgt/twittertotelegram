@@ -16,34 +16,34 @@
 
 import tweepy
 
-import twittertotelegram.sql as sql
+import json
 
 import twittertotelegram.supportmethods as support
 
-from twittertotelegram.config import news_info, APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET
+from twittertotelegram.config import news_info, BEARER_TOKEN
+
+twitter_ids = [twitter_id for twitter_id in news_info]
+
+class Streaming(tweepy.StreamingClient):
+    def on_data(self, raw_data):
+        tweet = json.loads(raw_data)
+
+        support.process_tweet(tweet)
 
 def main():
-    auth = tweepy.OAuth1UserHandler(APP_KEY, APP_SECRET)
-    auth.set_access_token(OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+    streamer = Streaming(BEARER_TOKEN)
 
-    app = tweepy.API(auth, wait_on_rate_limit=True)
+    # try:
+    #     for rule in streamer.get_rules().data:
+    #         streamer.delete_rules(ids=rule.id)
+    # except TypeError:
+    #     pass
 
-    for screen_name in news_info:
-        since_id_old = sql.get_since_id(screen_name)
+    # streamer.add_rules([tweepy.StreamRule(f'from:{news_info[twitter_id]["screen_name"]} -is:retweet') for twitter_id in news_info])
 
-        tweets = support.get_tweets(app, screen_name, since_id=since_id_old)
+    # print(streamer.get_rules())
 
-        try:
-            # Expected Exception if len(tweets) == 0
-            since_id_new = tweets[0].id
-
-            for tweet in tweets[::-1]:
-                support.process_tweet(tweet)
-
-            if since_id_new != since_id_old:
-                sql.update_since_id(screen_name, since_id_new)
-        except IndexError:
-            pass
+    streamer.filter(tweet_fields=["author_id", "in_reply_to_user_id", "referenced_tweets", "entities"], expansions=["attachments.media_keys"], media_fields=["type", "url", "variants"])
 
 if __name__ == "__main__":
     main()
