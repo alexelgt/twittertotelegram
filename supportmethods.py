@@ -36,16 +36,6 @@ def send_tweet(screen_name, tweet_text):
 
     return True
 
-def get_tweets(app, account, since_id=None, number_tweets=80):
-    tweets = tweepy.Cursor(app.user_timeline, 
-        screen_name=account, 
-        tweet_mode="extended",
-        since_id=since_id,
-        exclude_replies=False
-    ).items(number_tweets)
-
-    return list(tweets)
-
 def send_text_message(chat_id, output_text, link_entities=None):
     if link_entities is not None:
         link_entities = json.dumps(link_entities)
@@ -160,17 +150,6 @@ def remove_media_link(tweet_text, tweet_entities):
         pass
 
     return tweet_text
-
-# Should not be needed
-# def check_tweet(tweet):
-#     try:
-#         for referenced_tweet in tweet["data"]["referenced_tweets"]:
-#             if referenced_tweet["type"] == "retweeted":
-#                 return False
-
-#         return True
-#     except:
-#         return True
 
 def get_replied_to_id(tweet):
     try:

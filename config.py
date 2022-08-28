@@ -51,14 +51,4 @@ config_info.read(SCRIPT_FOLDER + "config.ini")
 
 BOT_TOKEN = config_info["bot"]["token"]
 
-SQL_USER = config_info["database"]["user"]
-SQL_PASSWORD = config_info["database"]["password"]
-SQL_DATABASE = config_info["database"]["name"]
-
-APP_KEY = config_info["twitter"]["app_key"]
-APP_SECRET = config_info["twitter"]["app_secret"]
-
-OAUTH_TOKEN = config_info["twitter"]["oauth_token"]
-OAUTH_TOKEN_SECRET = config_info["twitter"]["oauth_token_secret"]
-
 BEARER_TOKEN = config_info["twitter"]["bearer_token"]
