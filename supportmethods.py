@@ -148,6 +148,19 @@ def get_media_info(tweet_media_entities):
 
     return media_info
 
+def remove_media_link(tweet_text, tweet_entities):
+    try:
+        for entity in tweet_entities["urls"]:
+            try:
+                entity["media_key"]
+                return tweet_text.replace(entity["url"], "")
+            except KeyError:
+                pass
+    except:
+        pass
+
+    return tweet_text
+
 # Should not be needed
 # def check_tweet(tweet):
 #     try:
@@ -182,12 +195,7 @@ def process_tweet(tweet):
 
             if send_tweet(screen_name, tweet["data"]["text"]):
                 # Original Tweet
-
-                # Remove media link from output text
-                try:
-                    output_text = tweet["data"]["text"].replace(tweet["includes"]["media"][0]["url"], "")
-                except KeyError:
-                    output_text = tweet["data"]["text"]
+                output_text = remove_media_link(tweet["data"]["text"], tweet["data"]["entities"])
 
                 link_text = "🔗 Tweet link"
                 output_text = output_text.replace("&amp;", "&") + f"\n\n{link_text}"
