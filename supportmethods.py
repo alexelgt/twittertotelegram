@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import tweepy
-
 import json
 
 import requests
@@ -23,6 +21,8 @@ import requests
 from twittertotelegram.regex import TWITTER_USERNAME_REGEX
 
 from twittertotelegram.config import BOT_TOKEN, news_info
+
+TWEET_URL = "https://twitter.com/{}/status/{}"
 
 def utf_16_len(text):
     return int(len(text.encode("utf-16-le")) / 2)
@@ -41,7 +41,7 @@ def send_text_message(chat_id, output_text, link_entities=None):
         link_entities = json.dumps(link_entities)
 
     try:
-        if output_text != None:
+        if output_text is not None:
             message_sent = requests.post(
                 url=f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
                 data={
@@ -59,7 +59,7 @@ def send_text_message(chat_id, output_text, link_entities=None):
 
 def send_media_group_message(chat_id, output_text, media_info, link_entities=None):
     try:
-        if output_text != None:
+        if output_text is not None:
             images_info = [{"type": media["type"], "media": media["media_url"]} for media in media_info]
             images_info[0]["caption"] = output_text
             images_info[0]["caption_entities"] = link_entities
@@ -93,11 +93,9 @@ def update_username_entities(link_entities, output_text):
             {"type": "text_link", "offset": output_text_before_len, "length": username_text_len, "url": username_url}
         ])
 
-def update_link_entities(link_entities, link_text, output_text, screen_name, tweet_id):
+def update_link_entities(link_entities, link_text, output_text, tweet_url):
     output_text_len = utf_16_len(output_text)
     link_text_len = utf_16_len(link_text)
-
-    tweet_url = f"https://twitter.com/{screen_name}/status/{tweet_id}"
 
     link_entities.extend([
         {"type": "text_link", "offset": output_text_len - link_text_len, "length": link_text_len, "url": tweet_url},
@@ -151,11 +149,24 @@ def remove_media_link(tweet_text, tweet_entities):
 
     return tweet_text
 
-def get_replied_to_id(tweet):
+def get_tweet_type_id(tweet, tweet_type):
     try:
         for referenced_tweet in tweet["data"]["referenced_tweets"]:
-            if referenced_tweet["type"] == "replied_to":
+            if referenced_tweet["type"] == tweet_type:
                 return referenced_tweet["id"]
+    except:
+        pass
+
+    return None
+
+def get_quoted_tweet_link(tweet):
+    try:
+        quoted_id = get_tweet_type_id(tweet, "quoted")
+
+        if quoted_id is not None:
+            for url_info in tweet["data"]["entities"]["urls"]:
+                if ("twitter.com" in url_info["expanded_url"]) and (quoted_id in url_info["expanded_url"]):
+                    return url_info["url"]
     except:
         pass
 
@@ -174,13 +185,23 @@ def process_tweet(tweet):
 
             if send_tweet(screen_name, tweet["data"]["text"]):
                 # Original Tweet
+
+                # Remove media link
                 output_text = remove_media_link(tweet["data"]["text"], tweet["data"]["entities"])
 
+                # Remove quote link
+                quoted_tweet_link = get_quoted_tweet_link(tweet)
+
+                if quoted_tweet_link is not None:
+                    output_text = output_text.replace(quoted_tweet_link, "")
+
+                # Clean extra spaces
                 try:
                     output_text = output_text.strip()
                 except:
                     pass
 
+                # Tweet link
                 link_text = "🔗 Tweet link"
                 output_text = output_text.replace("&amp;", "&") + f"\n\n{link_text}"
 
@@ -188,14 +209,25 @@ def process_tweet(tweet):
 
                 update_username_entities(link_entities, output_text)
 
-                update_link_entities(link_entities, link_text, output_text, screen_name, tweet["data"]["id"])
+                tweet_url = TWEET_URL.format(screen_name, tweet["data"]["id"])
+
+                update_link_entities(link_entities, link_text, output_text, tweet_url)
 
                 # Reply Tweet
                 if in_reply_to_user_id is not None:
                     link_text = "📩 In reply to"
                     output_text += f" | {link_text}"
 
-                    update_link_entities(link_entities, link_text, output_text, screen_name, get_replied_to_id(tweet))
+                    reply_tweet_url = TWEET_URL.format(screen_name, get_tweet_type_id(tweet, "replied_to"))
+
+                    update_link_entities(link_entities, link_text, output_text, reply_tweet_url)
+
+                # Quote tweet
+                if quoted_tweet_link is not None:
+                    link_text = "💬 Quoted tweet"
+                    output_text += f" | {link_text}"
+
+                    update_link_entities(link_entities, link_text, output_text, quoted_tweet_link)
 
                 try:
                     # Expected Exception if Tweet does not have media

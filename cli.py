@@ -14,15 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import tweepy
-
 import json
+
+import tweepy
 
 import twittertotelegram.supportmethods as support
 
 from twittertotelegram.config import news_info, BEARER_TOKEN
-
-twitter_ids = [twitter_id for twitter_id in news_info]
 
 class Streaming(tweepy.StreamingClient):
     def on_data(self, raw_data):
