@@ -18,17 +18,31 @@ import json
 
 import requests
 
+import tweepy
+
 from twittertotelegram.regex import TWITTER_USERNAME_REGEX
 
-from twittertotelegram.config import BOT_TOKEN, news_info
+from twittertotelegram.config import BOT_TOKEN, news_info, BEARER_TOKEN
 
 TWEET_URL = "https://twitter.com/{}/status/{}"
 
 def utf_16_len(text):
     return int(len(text.encode("utf-16-le")) / 2)
 
+def get_author_id_of_tweet(tweet_id):
+    try:
+        client = tweepy.Client(BEARER_TOKEN)
+
+        response = client.get_tweet(tweet_id, tweet_fields=["author_id"])
+
+        return str(response.data.author_id)
+    except:
+        pass
+
+    return None
+
 def send_tweet(screen_name, tweet_text):
-    if screen_name == "LEGENDSLima":
+    if screen_name in ["LEGENDSLima", "MikoGraphicsPE"]:
         if any([x in tweet_text for x in ("🇺🇸", "🇪🇸", "🇫🇷")]):
             return ("🇺🇸" in tweet_text) or ("🇪🇸" in tweet_text)
 
@@ -166,11 +180,11 @@ def get_quoted_tweet_link(tweet):
         if quoted_id is not None:
             for url_info in tweet["data"]["entities"]["urls"]:
                 if ("twitter.com" in url_info["expanded_url"]) and (quoted_id in url_info["expanded_url"]):
-                    return url_info["url"]
+                    return url_info["url"], quoted_id
     except:
         pass
 
-    return None
+    return None, None
 
 def process_tweet(tweet):
     try:
@@ -190,7 +204,7 @@ def process_tweet(tweet):
                 output_text = remove_media_link(tweet["data"]["text"], tweet["data"]["entities"])
 
                 # Remove quote link
-                quoted_tweet_link = get_quoted_tweet_link(tweet)
+                quoted_tweet_link, quoted_id = get_quoted_tweet_link(tweet)
 
                 if quoted_tweet_link is not None:
                     output_text = output_text.replace(quoted_tweet_link, "")
@@ -224,6 +238,12 @@ def process_tweet(tweet):
 
                 # Quote tweet
                 if quoted_tweet_link is not None:
+                    quoted_author_id = get_author_id_of_tweet(quoted_id)
+
+                    # If the quoted tweet is not from the same author then don't send to Telegram
+                    if quoted_author_id != tweet["data"]["author_id"]:
+                        return
+
                     link_text = "💬 Quoted tweet"
                     output_text += f" | {link_text}"
 

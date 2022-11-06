@@ -34,9 +34,13 @@ news_info = {
         "channel_id": -1001632232660,
         "screen_name": "LeekDuck"
     },
-    "1024025263586172928": {
+    # "1024025263586172928": {
+    #     "channel_id": -1001740184540,
+    #     "screen_name": "LEGENDSLima"
+    # },
+    "1584975646412996619": {
         "channel_id": -1001740184540,
-        "screen_name": "LEGENDSLima"
+        "screen_name": "MikoGraphicsPE"
     },
     "1450170589071626243": {
         "channel_id": -1001637695143,
