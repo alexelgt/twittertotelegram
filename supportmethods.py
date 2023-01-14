@@ -1,5 +1,5 @@
 # twittertotelegram
-# Copyright (C) 2022 Alexelgt
+# Copyright (C) 2023 Alexelgt
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -135,7 +135,7 @@ def get_media_info(tweet_media_entities):
                         "media_url": media["url"]
                     }
                 )
-            elif media["type"] == "video":
+            elif media["type"] in ["video", "animated_gif"]:
                 video_url = get_video_url(media["variants"])
 
                 if video_url:
@@ -193,9 +193,11 @@ def process_tweet(tweet):
         except:
             in_reply_to_user_id = None
 
-        if (in_reply_to_user_id is None) or (in_reply_to_user_id == tweet["data"]["author_id"]):
-            screen_name = news_info[tweet["data"]["author_id"]]["screen_name"]
-            channel_id = news_info[tweet["data"]["author_id"]]["channel_id"]
+        author_id = str(tweet["data"]["author_id"])
+
+        if (in_reply_to_user_id is None) or (in_reply_to_user_id == author_id):
+            screen_name = news_info[author_id]["screen_name"]
+            channel_id = news_info[author_id]["channel_id"]
 
             if send_tweet(screen_name, tweet["data"]["text"]):
                 # Original Tweet
@@ -241,7 +243,7 @@ def process_tweet(tweet):
                     quoted_author_id = get_author_id_of_tweet(quoted_id)
 
                     # If the quoted tweet is not from the same author then don't send to Telegram
-                    if quoted_author_id != tweet["data"]["author_id"]:
+                    if quoted_author_id != author_id:
                         return
 
                     link_text = "💬 Quoted tweet"
@@ -252,6 +254,9 @@ def process_tweet(tweet):
                 try:
                     # Expected Exception if Tweet does not have media
                     media_info = get_media_info(tweet["includes"]["media"])
+
+                    if len(media_info) == 0:
+                        raise KeyError # Raise error if no media found (send as only text)
 
                     send_media_group_message(channel_id, output_text, media_info, link_entities=link_entities)
                 except KeyError:

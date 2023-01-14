@@ -14,6 +14,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import re
+import tweepy
 
-TWITTER_USERNAME_REGEX = re.compile(r"\B@\w{1,15}\b")
+import twittertotelegram.supportmethods as support
+
+from twittertotelegram.config import BEARER_TOKEN
+
+tweet_id = 1598035205310513152
+
+def main():
+    client = tweepy.Client(BEARER_TOKEN)
+
+    response = client.get_tweets(tweet_id, tweet_fields=["author_id", "in_reply_to_user_id", "referenced_tweets", "entities"], expansions=["attachments.media_keys"], media_fields=["type", "url", "variants"])
+
+    tweet = {
+        "data": dict(response.data[0]),
+        "includes": response.includes
+    }
+
+    print(tweet)
+
+    support.process_tweet(tweet)
+
+if __name__ == "__main__":
+    main()

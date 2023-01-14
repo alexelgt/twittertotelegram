@@ -1,5 +1,5 @@
 # twittertotelegram
-# Copyright (C) 2022 Alexelgt
+# Copyright (C) 2023 Alexelgt
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published

@@ -1,2 +1,2 @@
 configparser>=5.0.2
-tweepy>=4.10.0
+tweepy>=4.12.1
