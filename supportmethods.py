@@ -43,10 +43,11 @@ def get_author_id_of_tweet(tweet_id):
 
 def send_tweet(screen_name, tweet_text):
     if screen_name in ["LEGENDSLima", "MikoGraphicsPE"]:
-        if any([x in tweet_text for x in ("🇺🇸", "🇪🇸", "🇫🇷")]):
+        if any(x in tweet_text for x in ("🇺🇸", "🇪🇸", "🇫🇷")):
             return ("🇺🇸" in tweet_text) or ("🇪🇸" in tweet_text)
 
-        return True
+    if screen_name == "PokemonGoApp":
+        return "Thanks for joining our Gimmighoul celebration!" not in tweet_text
 
     return True
 
